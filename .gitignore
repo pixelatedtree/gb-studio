@@ -8,11 +8,11 @@ src/data/output
 coverage
 .cache
 .parcelCache
-/.vscode
 /dist
 .DS_Store
 test/projects/*/build
 buildTools/*/gbdk
+.turbo/
 
 # Webpack
 .webpack/
