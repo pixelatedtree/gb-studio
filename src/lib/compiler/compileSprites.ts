@@ -12,7 +12,10 @@ import { IndexedImage } from "shared/lib/tiles/indexedImage";
 import { assetFilename } from "shared/lib/helpers/assets";
 import { optimiseTiles } from "lib/sprites/readSpriteData";
 import { ReferencedSprite } from "./precompile/determineUsedAssets";
-import { ColorModeSetting } from "shared/lib/resources/types";
+import {
+  ColorModeSetting,
+  SpriteModeSetting,
+} from "shared/lib/resources/types";
 
 const S_PALETTE = 0x10;
 const S_FLIPX = 0x20;
@@ -21,10 +24,10 @@ const S_PRIORITY = 0x80;
 const S_GBC_PALETTE_MASK = 0x7;
 const S_VRAM2 = 0x8;
 
-export type SpriteTileAllocationStrategy = (
+type SpriteTileAllocationStrategy = (
   tileIndex: number,
   numTiles: number,
-  sprite: SpriteSheetData
+  sprite: SpriteSheetData,
 ) => { tileIndex: number; inVRAM2: boolean };
 
 interface AnimationOffset {
@@ -55,8 +58,8 @@ interface SpriteTileData {
  * @param {number} numTiles - The total number of tiles available for allocation.
  * @returns {{ tileIndex: number, inVRAM2: boolean }} Updated tile index and flag which is set if tile has been reallocated to VRAM bank2.
  */
-export const spriteTileAllocationDefault: SpriteTileAllocationStrategy = (
-  tileIndex
+const spriteTileAllocationDefault: SpriteTileAllocationStrategy = (
+  tileIndex,
 ) => {
   return {
     tileIndex,
@@ -71,9 +74,9 @@ export const spriteTileAllocationDefault: SpriteTileAllocationStrategy = (
  * @param {number} numTiles - The total number of tiles available for allocation.
  * @returns {{ tileIndex: number, inVRAM2: boolean }} Updated tile index and flag which is set if tile has been reallocated to VRAM bank2.
  */
-export const spriteTileAllocationColorOnly: SpriteTileAllocationStrategy = (
+const spriteTileAllocationColorOnly: SpriteTileAllocationStrategy = (
   tileIndex,
-  numTiles
+  numTiles,
 ) => {
   const bank1NumTiles = Math.ceil(numTiles / 4) * 2;
   const inVRAM2 = tileIndex >= bank1NumTiles;
@@ -90,7 +93,8 @@ export const spriteTileAllocationColorOnly: SpriteTileAllocationStrategy = (
  * @param {number} numTiles - The total number of tiles available for allocation.
  * @returns {{ tileIndex: number, inVRAM2: boolean }} Updated tile index and flag which is set if tile has been reallocated to VRAM bank2.
  */
-export const spriteTileAllocationVRAM2Only = (tileIndex: number) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const spriteTileAllocationVRAM2Only = (tileIndex: number) => {
   return {
     tileIndex,
     inVRAM2: true,
@@ -103,7 +107,7 @@ const makeProps = (
   flipX: boolean,
   flipY: boolean,
   priority: boolean,
-  inVRAM2: boolean
+  inVRAM2: boolean,
 ): number => {
   return (
     (objPalette === "OBP1" ? S_PALETTE : 0) +
@@ -118,9 +122,13 @@ const makeProps = (
 export const compileSprite = async (
   spriteSheet: ReferencedSprite,
   cgbOnly: boolean,
-  projectRoot: string
+  projectRoot: string,
+  defaultSpriteMode: SpriteModeSetting,
 ): Promise<PrecompiledSpriteSheetData> => {
   const filename = assetFilename(projectRoot, "sprites", spriteSheet);
+
+  const spriteMode: SpriteModeSetting =
+    spriteSheet.spriteMode ?? defaultSpriteMode ?? "8x16";
 
   const tileAllocationStrategy = cgbOnly
     ? spriteTileAllocationColorOnly
@@ -138,7 +146,8 @@ export const compileSprite = async (
     filename,
     spriteSheet.canvasWidth,
     spriteSheet.canvasHeight,
-    metasprites
+    metasprites,
+    spriteMode,
   );
 
   const animationDefs: SpriteTileData[][][] = spriteSheet.states
@@ -154,7 +163,7 @@ export const compileSprite = async (
             }
             return animation.frames.map((frame) => {
               let currentX = 0;
-              let currentY = 0;
+              let currentY = spriteMode === "8x16" ? 0 : -8;
               return [...frame.tiles]
                 .reverse()
                 .map((tile) => {
@@ -165,7 +174,7 @@ export const compileSprite = async (
                   const { tileIndex, inVRAM2 } = tileAllocationStrategy(
                     optimisedTile.tile,
                     tiles.length,
-                    spriteSheet
+                    spriteSheet,
                   );
                   if (flip) {
                     const data: SpriteTileData = {
@@ -178,7 +187,7 @@ export const compileSprite = async (
                         !optimisedTile.flipX,
                         optimisedTile.flipY,
                         tile.priority,
-                        inVRAM2
+                        inVRAM2,
                       ),
                     };
                     currentX = 8 - tile.x;
@@ -195,7 +204,7 @@ export const compileSprite = async (
                       optimisedTile.flipX,
                       optimisedTile.flipY,
                       tile.priority,
-                      inVRAM2
+                      inVRAM2,
                     ),
                   };
                   currentX = tile.x;
@@ -204,9 +213,9 @@ export const compileSprite = async (
                 })
                 .filter((tile) => tile) as SpriteTileData[];
             });
-          }
-        )
-      )
+          },
+        ),
+      ),
     )
     .flat();
 
@@ -262,7 +271,8 @@ export const compileSprite = async (
 
 const compileSprites = async (
   spriteSheets: ReferencedSprite[],
-  projectRoot: string
+  projectRoot: string,
+  defaultSpriteMode: SpriteModeSetting,
 ): Promise<{
   spritesData: PrecompiledSpriteSheetData[];
   statesOrder: string[];
@@ -275,9 +285,10 @@ const compileSprites = async (
         compileSprite(
           spriteSheet,
           spriteSheet.colorMode === "color",
-          projectRoot
-        )
-    )
+          projectRoot,
+          defaultSpriteMode,
+        ),
+    ),
   );
   const stateNames = spritesData
     .map((sprite) => sprite.states)
@@ -285,10 +296,13 @@ const compileSprites = async (
     .map((state) => state.name)
     .filter((name) => name.length > 0);
 
-  const stateCounts = stateNames.reduce((memo, name) => {
-    name in memo ? (memo[name] += 1) : (memo[name] = 1);
-    return memo;
-  }, {} as Record<string, number>);
+  const stateCounts = stateNames.reduce(
+    (memo, name) => {
+      name in memo ? (memo[name] += 1) : (memo[name] = 1);
+      return memo;
+    },
+    {} as Record<string, number>,
+  );
 
   const statesOrder = Object.keys(stateCounts).sort((a, b) => {
     if (stateCounts[a] === stateCounts[b]) {

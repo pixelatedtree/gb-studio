@@ -5,12 +5,10 @@ import {
   buildLinkFile,
   buildLinkFlags,
   getBuildCommands,
-  getPackFiles,
 } from "./buildMakeScript";
 import { cacheObjData, fetchCachedObjData } from "./objCache";
 import ensureBuildTools from "./ensureBuildTools";
 import spawn, { ChildProcess } from "lib/helpers/cli/spawn";
-import { gbspack } from "./gbspack";
 import l10n from "shared/lib/lang/l10n";
 import { ProjectResources } from "shared/lib/resources/types";
 import psTree from "ps-tree";
@@ -21,6 +19,7 @@ const psTreeAsync = promisify(psTree);
 
 type MakeOptions = {
   buildRoot: string;
+  romFilename: string;
   tmpPath: string;
   data: ProjectResources;
   buildType: "rom" | "web" | "pocket";
@@ -36,6 +35,7 @@ let cancelling = false;
 const makeBuild = async ({
   buildRoot = "/tmp",
   tmpPath = "/tmp",
+  romFilename,
   data,
   debug = false,
   buildType = "rom",
@@ -54,7 +54,7 @@ const makeBuild = async ({
   const buildToolsPath = await ensureBuildTools(tmpPath);
   const buildToolsVersion = await fs.readFile(
     `${buildToolsPath}/tools_version`,
-    "utf8"
+    "utf8",
   );
 
   env.PATH = envWith([Path.join(buildToolsPath, "gbdk", "bin")]);
@@ -137,13 +137,13 @@ const makeBuild = async ({
             {
               onLog: (msg) => warnings(msg), // LCC writes errors to stdout
               onError: (msg) => warnings(msg),
-            }
+            },
           );
           childSet.add(child);
           await completed;
           childSet.delete(child);
         }
-      })
+      }),
   );
 
   // GBSPack ---
@@ -152,24 +152,6 @@ const makeBuild = async ({
     throw new Error("BUILD_CANCELLED");
   }
 
-  progress(`${l10n("COMPILER_PACKING")}...`);
-  const { cartSize, report } = await gbspack(await getPackFiles(buildRoot), {
-    bankOffset: 1,
-    filter: 255,
-    extension: "rel",
-    additional: batterylessEnabled ? 4 : 0,
-    reserve:
-      settings.musicDriver !== "huge"
-        ? {
-            // Reserve space in bank1 for gbt_player.lib
-            1: 0x800,
-          }
-        : {},
-  });
-
-  const packReportFilePath = `${buildRoot}/build/rom/bank_usage.txt`;
-  await fs.writeFile(packReportFilePath, report);
-
   // Link ROM ---
 
   if (cancelling) {
@@ -177,7 +159,7 @@ const makeBuild = async ({
   }
 
   progress(`${l10n("COMPILER_LINKING")}...`);
-  const linkFile = await buildLinkFile(buildRoot, cartSize);
+  const linkFile = await buildLinkFile(buildRoot);
   const linkFilePath = `${buildRoot}/obj/linkfile.lk`;
   await fs.writeFile(linkFilePath, linkFile);
 
@@ -187,14 +169,16 @@ const makeBuild = async ({
       : `../_gbstools/gbdk/bin/lcc`;
   const linkArgs = buildLinkFlags(
     linkFilePath,
+    romFilename,
     data.metadata.name || "GBStudio",
     settings.cartType,
     colorEnabled,
     sgbEnabled,
     colorOnly,
     settings.musicDriver,
+    batterylessEnabled,
     debug,
-    targetPlatform
+    targetPlatform,
   );
 
   const { completed: linkCompleted, child } = spawn(
@@ -209,12 +193,17 @@ const makeBuild = async ({
         }
         warnings(msg);
       },
-    }
+    },
   );
 
   childSet.add(child);
   await linkCompleted;
   childSet.delete(child);
+
+  // Export game globals to ROM directory
+  const gameGlobalsPath = `${buildRoot}/include/data/game_globals.i`;
+  const gameGlobalsExportPath = `${buildRoot}/build/rom/globals.i`;
+  await fs.copyFile(gameGlobalsPath, gameGlobalsExportPath);
 
   // Store /obj in cache
   await cacheObjData(buildRoot, tmpPath, env);

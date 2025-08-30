@@ -1,15 +1,12 @@
 import { parentPort, workerData, isMainThread, threadId } from "worker_threads";
 import loadAllScriptEventHandlers from "lib/project/loadScriptEventHandlers";
-import type {
-  EngineFieldSchema,
-  SceneTypeSchema,
-} from "store/features/engine/engineState";
 import compileData from "./compileData";
 import { ProjectResources } from "shared/lib/resources/types";
 import { L10NLookup, setL10NData } from "shared/lib/lang/l10n";
 import ejectBuild from "./ejectBuild";
 import { validateEjectedBuild } from "./validate/validateEjectedBuild";
 import makeBuild, { cancelBuildCommandsInProgress } from "./makeBuild";
+import { EngineSchema } from "lib/project/loadEngineSchema";
 
 export type BuildType = "rom" | "web" | "pocket";
 
@@ -18,9 +15,9 @@ export type BuildWorkerData = {
   buildType: BuildType;
   projectRoot: string;
   tmpPath: string;
-  engineFields: EngineFieldSchema[];
-  sceneTypes: SceneTypeSchema[];
+  engineSchema: EngineSchema;
   outputRoot: string;
+  romFilename: string;
   make: boolean;
   debugEnabled?: boolean;
   l10nData: L10NLookup;
@@ -52,10 +49,10 @@ let terminating = false;
 const buildProject = async ({
   project,
   projectRoot,
-  engineFields,
-  sceneTypes,
+  engineSchema,
   tmpPath,
   outputRoot,
+  romFilename,
   buildType,
   make,
   debugEnabled,
@@ -69,9 +66,8 @@ const buildProject = async ({
 
   const compiledData = await compileData(project, {
     projectRoot,
-    engineFields,
+    engineSchema,
     scriptEventHandlers,
-    sceneTypes,
     tmpPath,
     debugEnabled,
     progress,
@@ -82,8 +78,7 @@ const buildProject = async ({
     projectRoot,
     tmpPath,
     projectData: project,
-    engineFields,
-    sceneTypes,
+    engineSchema,
     outputRoot,
     compiledData,
     progress,
@@ -99,6 +94,7 @@ const buildProject = async ({
   if (make) {
     await makeBuild({
       buildRoot: outputRoot,
+      romFilename,
       tmpPath,
       buildType,
       data: project,

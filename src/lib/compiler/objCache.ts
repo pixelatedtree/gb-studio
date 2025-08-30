@@ -15,8 +15,6 @@ interface ParsedInclude {
 type IncludesLookup = Record<string, ParsedInclude>;
 type GameGlobalsLookup = Record<string, string>;
 
-export const objCache = {};
-
 const GAME_GLOBALS_FILE = "data/game_globals.i";
 
 const referencedFiles = (string: string): string[] => {
@@ -27,7 +25,7 @@ const fileChecksum = async (
   filename: string,
   includesLookup: IncludesLookup,
   gameGlobalsLookup: GameGlobalsLookup,
-  envChecksum: string
+  envChecksum: string,
 ) => {
   const fileContents = await readFile(filename, "utf8");
   const fileChecksum = checksumString(fileContents);
@@ -56,10 +54,10 @@ const fileChecksum = async (
     : [];
   const usedGlobalAddresses = usedGlobals.reduce(
     (memo, g) => (memo += `${gameGlobalsLookup[g]}_`),
-    ""
+    "",
   );
   return checksumString(
-    `${fileChecksum}_${headerChecksums}_${usedGlobalAddresses}_${envChecksum}`
+    `${fileChecksum}_${headerChecksums}_${usedGlobalAddresses}_${envChecksum}`,
   );
 };
 
@@ -94,7 +92,7 @@ const generateGameGlobalsLookup = (gameGlobalsContents: string) => {
 export const cacheObjData = async (
   buildRoot: string,
   tmpPath: string,
-  env: NodeJS.ProcessEnv
+  env: NodeJS.ProcessEnv,
 ) => {
   const cacheRoot = Path.normalize(`${tmpPath}/_gbscache/obj`);
   const buildObjRoot = Path.normalize(`${buildRoot}/obj`);
@@ -105,7 +103,7 @@ export const cacheObjData = async (
 
   const includesLookup = await generateIncludesLookup(buildIncludeRoot);
   const gameGlobalsLookup = generateGameGlobalsLookup(
-    includesLookup[GAME_GLOBALS_FILE]?.contents
+    includesLookup[GAME_GLOBALS_FILE]?.contents,
   );
 
   const objFiles = await globAsync(`${buildObjRoot}/*.o`);
@@ -130,7 +128,7 @@ export const cacheObjData = async (
           matchingSrc,
           includesLookup,
           gameGlobalsLookup,
-          envChecksum
+          envChecksum,
         );
 
         const outFile = `${cacheRoot}/${cacheFilename}`;
@@ -143,7 +141,7 @@ export const cacheObjData = async (
 export const fetchCachedObjData = async (
   buildRoot: string,
   tmpPath: string,
-  env: NodeJS.ProcessEnv
+  env: NodeJS.ProcessEnv,
 ) => {
   const cacheRoot = Path.normalize(`${tmpPath}/_gbscache/obj`);
   const buildObjRoot = Path.normalize(`${buildRoot}/obj`);
@@ -153,7 +151,7 @@ export const fetchCachedObjData = async (
   const envChecksum = checksumString(JSON.stringify(env));
   const includesLookup = await generateIncludesLookup(buildIncludeRoot);
   const gameGlobalsLookup = generateGameGlobalsLookup(
-    includesLookup[GAME_GLOBALS_FILE]?.contents
+    includesLookup[GAME_GLOBALS_FILE]?.contents,
   );
 
   const srcFiles = await globAsync(`${buildSrcRoot}/**/*.{c,s}`);
@@ -166,7 +164,7 @@ export const fetchCachedObjData = async (
       srcFilePath,
       includesLookup,
       gameGlobalsLookup,
-      envChecksum
+      envChecksum,
     );
 
     const cacheFile = `${cacheRoot}/${cacheFilename}`;

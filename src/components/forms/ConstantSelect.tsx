@@ -24,7 +24,7 @@ interface ConstantSelectProps extends SelectCommonProps {
   onChange: (newValue: string) => void;
 }
 
-export const ConstantSelectWrapper = styled.div`
+const ConstantSelectWrapper = styled.div`
   position: relative;
   width: 100%;
   min-width: 78px;
@@ -136,10 +136,10 @@ export const ConstantSelect: FC<ConstantSelectProps> = ({
   const [editValue, setEditValue] = useState("");
   const [renameId, setRenameId] = useState("");
   const constants = useAppSelector((state) =>
-    constantSelectors.selectAll(state)
+    constantSelectors.selectAll(state),
   );
   const currentConstant = useAppSelector((state) =>
-    constantSelectors.selectById(state, value ?? "")
+    constantSelectors.selectById(state, value ?? ""),
   );
 
   const options = useMemo(() => {
@@ -147,7 +147,7 @@ export const ConstantSelect: FC<ConstantSelectProps> = ({
       (constant, constantIndex): Option => ({
         value: constant.id,
         label: constantName(constant, constantIndex),
-      })
+      }),
     );
   }, [constants]);
 
@@ -157,7 +157,7 @@ export const ConstantSelect: FC<ConstantSelectProps> = ({
         value: currentConstant.id,
         label: constantName(
           currentConstant,
-          constants.indexOf(currentConstant)
+          constants.indexOf(currentConstant),
         ),
       };
     }
@@ -196,14 +196,14 @@ export const ConstantSelect: FC<ConstantSelectProps> = ({
         entitiesActions.renameConstant({
           constantId: renameId,
           name: editValue,
-        })
+        }),
       );
     }
     setRenameVisible(false);
   };
 
   const onJumpToConstant = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => {
     if (e.altKey) {
       if (

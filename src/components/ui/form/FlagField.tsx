@@ -9,7 +9,7 @@ import { IMEInput } from "ui/form/IMEInput";
 import entitiesActions from "store/features/entities/entitiesActions";
 import { variableSelectors } from "store/features/entities/entitiesState";
 
-export interface FlagFieldFieldProps {
+interface FlagFieldFieldProps {
   readonly name: string;
   readonly bit: string;
   readonly variableId: string;
@@ -183,14 +183,14 @@ export const FlagField: FC<FlagFieldFieldProps> = ({
         entitiesActions.renameVariableFlags({
           variableId: `${entityId}__${variableId}`,
           flags: newFlags,
-        })
+        }),
       );
     } else {
       dispatch(
         entitiesActions.renameVariableFlags({
           variableId: variableId || "0",
           flags: newFlags,
-        })
+        }),
       );
     }
     setRenameVisible(false);

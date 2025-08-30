@@ -21,7 +21,7 @@ export interface MenuItemProps extends React.HTMLAttributes<HTMLDivElement> {
   readonly selected?: boolean;
   readonly onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   readonly onMouseEnter?: (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => void;
   readonly subMenu?: React.ReactElement[];
   readonly icon?: ReactNode;
@@ -42,7 +42,7 @@ export const MenuItem = ({
   </StyledMenuItem>
 );
 
-export interface MenuItemIconProps {
+interface MenuItemIconProps {
   readonly children?: ReactNode;
 }
 
@@ -68,7 +68,7 @@ export const MenuSection = styled.div`
 
 export const MenuDivider = () => <StyledMenuDivider />;
 
-export interface MenuAcceleratorProps {
+interface MenuAcceleratorProps {
   accelerator: string;
 }
 

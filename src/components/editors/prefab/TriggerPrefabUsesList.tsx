@@ -37,7 +37,7 @@ const UseMessage = styled.div`
   font-size: 11px;
 `;
 
-export type TriggerPrefabUse = {
+type TriggerPrefabUse = {
   id: string;
   name: string;
 } & (
@@ -88,7 +88,7 @@ export const TriggerPrefabUsesList: FC<TriggerPrefabUsesListProps> = ({
                 ? triggerName(trigger, triggerIndex)
                 : `${triggerName(trigger, triggerIndex)} (+${l10n(
                     numChanges === 1 ? "FIELD_N_CHANGE" : "FIELD_N_CHANGES",
-                    { n: numChanges }
+                    { n: numChanges },
                   )})`,
             trigger,
             triggerIndex,
@@ -118,7 +118,7 @@ export const TriggerPrefabUsesList: FC<TriggerPrefabUsesListProps> = ({
 
   const setSelectedId = (id: string, item: TriggerPrefabUse) => {
     dispatch(
-      editorActions.selectTrigger({ triggerId: id, sceneId: item.sceneId })
+      editorActions.selectTrigger({ triggerId: id, sceneId: item.sceneId }),
     );
     dispatch(editorActions.setFocusSceneId(item.sceneId));
   };

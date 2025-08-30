@@ -2,14 +2,6 @@ import { createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import {
   EntitiesState,
   ProjectEntitiesData,
-  BackgroundData,
-  SpriteSheetData,
-  MusicData,
-  FontData,
-  AvatarData,
-  EmoteData,
-  SoundData,
-  TilesetData,
 } from "shared/lib/entities/entitiesTypes";
 import type { RootState } from "store/configureStore";
 import { SettingsState } from "store/features/settings/settingsState";
@@ -33,7 +25,7 @@ export type ProjectData = ProjectEntitiesData & {
   settings: SettingsState;
 };
 
-export const saveSteps = [
+const saveSteps = [
   "saving",
   "normalizing",
   "compressing",
@@ -43,7 +35,7 @@ export const saveSteps = [
   "complete",
 ] as const;
 
-export type SaveStep = typeof saveSteps[number];
+export type SaveStep = (typeof saveSteps)[number];
 
 export const denormalizeProject = (project: {
   entities: EntitiesState;
@@ -64,83 +56,12 @@ export const denormalizeProject = (project: {
   };
 };
 
-export const trimProjectData = (data: ProjectData): ProjectData => {
-  return {
-    ...data,
-    backgrounds: data.backgrounds.map(
-      (background) =>
-        ({
-          ...background,
-          inode: undefined,
-          _v: undefined,
-        } as unknown as BackgroundData)
-    ),
-    spriteSheets: data.spriteSheets.map(
-      (spriteSheet) =>
-        ({
-          ...spriteSheet,
-          inode: undefined,
-          _v: undefined,
-        } as unknown as SpriteSheetData)
-    ),
-    music: data.music.map(
-      (track) =>
-        ({
-          ...track,
-          inode: undefined,
-          _v: undefined,
-        } as unknown as MusicData)
-    ),
-    sounds: data.sounds.map(
-      (sound) =>
-        ({
-          ...sound,
-          inode: undefined,
-          _v: undefined,
-        } as unknown as SoundData)
-    ),
-    fonts: data.fonts.map(
-      (font) =>
-        ({
-          ...font,
-          mapping: undefined,
-          inode: undefined,
-          _v: undefined,
-        } as unknown as FontData)
-    ),
-    avatars: data.avatars.map(
-      (avatar) =>
-        ({
-          ...avatar,
-          inode: undefined,
-          _v: undefined,
-        } as unknown as AvatarData)
-    ),
-    emotes: data.emotes.map(
-      (emote) =>
-        ({
-          ...emote,
-          inode: undefined,
-          _v: undefined,
-        } as unknown as EmoteData)
-    ),
-    tilesets: data.tilesets.map(
-      (tileset) =>
-        ({
-          ...tileset,
-          inode: undefined,
-          _v: undefined,
-        } as unknown as TilesetData)
-    ),
-  };
-};
-
 const openProject = createAction<string>("project/openProject");
 const closeProject = createAction<void>("project/closeProject");
 
 const setSaveStep = createAction<SaveStep>("project/setSaveStep");
 const setSaveWriteProgress = createAction<{ completed: number; total: number }>(
-  "project/setSaveWriteProgress"
+  "project/setSaveWriteProgress",
 );
 
 const loadProject = createAsyncThunk<
@@ -213,7 +134,7 @@ const renameBackgroundAsset = createAction<{
   newFilename: string;
 }>("project/renameBackgroundAsset");
 const removeBackgroundAsset = createAction<{ backgroundId: string }>(
-  "project/removeBackgroundAsset"
+  "project/removeBackgroundAsset",
 );
 
 const renameTilesetAsset = createAction<{
@@ -221,7 +142,7 @@ const renameTilesetAsset = createAction<{
   newFilename: string;
 }>("project/renameTilesetAsset");
 const removeTilesetAsset = createAction<{ tilesetId: string }>(
-  "project/removeTilesetAsset"
+  "project/removeTilesetAsset",
 );
 
 const renameSpriteAsset = createAction<{
@@ -229,21 +150,21 @@ const renameSpriteAsset = createAction<{
   newFilename: string;
 }>("project/renameSpriteAsset");
 const removeSpriteAsset = createAction<{ spriteSheetId: string }>(
-  "project/removeSpriteAsset"
+  "project/removeSpriteAsset",
 );
 
 const renameMusicAsset = createAction<{ musicId: string; newFilename: string }>(
-  "project/renameMusicAsset"
+  "project/renameMusicAsset",
 );
 const removeMusicAsset = createAction<{ musicId: string }>(
-  "project/removeMusicAsset"
+  "project/removeMusicAsset",
 );
 
 const renameSoundAsset = createAction<{ soundId: string; newFilename: string }>(
-  "project/renameSoundAsset"
+  "project/renameSoundAsset",
 );
 const removeSoundAsset = createAction<{ soundId: string }>(
-  "project/removeSoundAsset"
+  "project/removeSoundAsset",
 );
 
 /**************************************************************************
@@ -291,7 +212,7 @@ const saveProject = createAsyncThunk<void>(
       thunkApi.dispatch(setSaveStep("patching"));
       const patch = buildCompressedProjectResourcesPatch(
         data,
-        resourceChecksums
+        resourceChecksums,
       );
 
       thunkApi.dispatch(setSaveStep("writing"));
@@ -305,7 +226,7 @@ const saveProject = createAsyncThunk<void>(
     }
 
     saving = false;
-  }
+  },
 );
 
 const projectActions = {

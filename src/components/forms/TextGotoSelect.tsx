@@ -6,7 +6,7 @@ import { FormField, FormRow } from "ui/form/layout/FormLayout";
 import { NumberInput } from "ui/form/NumberInput";
 import { ToggleButtonGroup } from "ui/form/ToggleButtonGroup";
 
-export interface TextGotoValue {
+interface TextGotoValue {
   offsetX: number;
   offsetY: number;
   relative: boolean;
@@ -42,7 +42,7 @@ export const TextGotoSelect = ({
         label: l10n("FIELD_MOVE_BY"),
       },
     ],
-    []
+    [],
   );
 
   const debouncedLeave = useCallback(() => {
@@ -77,7 +77,7 @@ export const TextGotoSelect = ({
       }
       debouncedLeave();
     },
-    [debouncedLeave]
+    [debouncedLeave],
   );
 
   const onChangeRelative = useCallback(
@@ -87,7 +87,7 @@ export const TextGotoSelect = ({
         relative: newRelative,
       });
     },
-    [internalValue]
+    [internalValue],
   );
 
   const onChangeX = useCallback(
@@ -97,7 +97,7 @@ export const TextGotoSelect = ({
         offsetX: parseInt(event.currentTarget.value, 10),
       });
     },
-    [internalValue]
+    [internalValue],
   );
 
   const onChangeY = useCallback(
@@ -107,7 +107,7 @@ export const TextGotoSelect = ({
         offsetY: parseInt(event.currentTarget.value, 10),
       });
     },
-    [internalValue]
+    [internalValue],
   );
 
   return (

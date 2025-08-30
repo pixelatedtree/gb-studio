@@ -8,18 +8,11 @@ import { walkNormalizedScript, walkScript } from "shared/lib/scripts/walk";
 import isEqual from "lodash/isEqual";
 import SparkMD5 from "spark-md5";
 
-export const isEmptyScript = (script: ScriptEvent[]) => {
-  if (script.length === 0) {
-    return true;
-  }
-  return script.every((scriptEvent) => scriptEvent?.args?.__comment);
-};
-
 export const isNormalizedScriptEqual = (
   idsA: string[] = [],
   lookupA: Record<string, ScriptEventNormalized>,
   idsB: string[] = [],
-  lookupB: Record<string, ScriptEventNormalized>
+  lookupB: Record<string, ScriptEventNormalized>,
 ) => {
   const scriptAEvents: { args?: Record<string, unknown>; command: string }[] =
     [];
@@ -64,7 +57,7 @@ export const generateScriptHash = (script: ScriptEvent[]): string => {
 // Compare args with undefined and missing args as equivalent
 const isArgsEqual = (
   a: Record<string, unknown>,
-  b: Record<string, unknown>
+  b: Record<string, unknown>,
 ): boolean => {
   const keys = new Set<string>([...Object.keys(a), ...Object.keys(b)]);
   for (const key of keys) {

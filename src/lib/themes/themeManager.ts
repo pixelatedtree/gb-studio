@@ -13,7 +13,7 @@ import { merge, cloneDeep } from "lodash";
 const globAsync = promisify(glob);
 
 const themeIds = ["dark", "light"] as const;
-export type ThemeId = typeof themeIds[number];
+type ThemeId = (typeof themeIds)[number];
 
 const themes: Record<ThemeId, ThemeInterface> = {
   light: lightTheme,
@@ -25,14 +25,8 @@ const windowsThemes: Record<ThemeId, ThemeInterface> = {
   dark: darkThemeWin,
 };
 
-export interface ThemePlugin {
-  id: string;
-  name: string;
-  theme: JSON;
-}
-
-export const loadThemePlugin = async (
-  path: string
+const loadThemePlugin = async (
+  path: string,
 ): Promise<(JSON & { name: string; type: unknown }) | null> => {
   try {
     const theme = await readJSON(path);
@@ -59,7 +53,7 @@ export class ThemeManager {
     this.pluginThemes = {};
     const globalPluginsPath = getGlobalPluginsPath();
     const pluginPaths = await globAsync(
-      join(globalPluginsPath, "**/theme.json")
+      join(globalPluginsPath, "**/theme.json"),
     );
     for (const path of pluginPaths) {
       const theme = await loadThemePlugin(path);

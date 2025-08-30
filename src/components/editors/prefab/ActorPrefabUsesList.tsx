@@ -37,7 +37,7 @@ const UseMessage = styled.div`
   font-size: 11px;
 `;
 
-export type ActorPrefabUse = {
+type ActorPrefabUse = {
   id: string;
   name: string;
 } & (
@@ -85,7 +85,7 @@ export const ActorPrefabUsesList: FC<ActorPrefabUsesListProps> = ({
                 ? actorName(actor, actorIndex)
                 : `${actorName(actor, actorIndex)} (+${l10n(
                     numChanges === 1 ? "FIELD_N_CHANGE" : "FIELD_N_CHANGES",
-                    { n: numChanges }
+                    { n: numChanges },
                   )})`,
             actor,
             actorIndex,

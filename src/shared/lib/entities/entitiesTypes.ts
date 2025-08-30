@@ -2,10 +2,14 @@ import type { EntityState } from "@reduxjs/toolkit";
 import type {
   ColorModeOverrideSetting,
   Constant,
+  SceneBoundsRect,
   ScriptEditorCtxType,
+  SpriteModeSetting,
 } from "shared/lib/resources/types";
 
 export type CollisionGroup = "" | "1" | "2" | "3" | "player";
+
+export type CollisionExtraFlag = "1" | "2" | "3" | "4" | "solid" | "platform";
 
 export type ActorDirection = "up" | "down" | "left" | "right";
 export type SpriteAnimationType =
@@ -13,6 +17,8 @@ export type SpriteAnimationType =
   | "fixed_movement"
   | "multi"
   | "multi_movement"
+  | "horizontal"
+  | "horizontal_movement"
   | "platform_player"
   | "cursor";
 export type ObjPalette = "OBP0" | "OBP1";
@@ -85,7 +91,7 @@ export const actorScriptKeys = [
   "hit2Script",
   "hit3Script",
 ] as const;
-export type ActorScriptKey = typeof actorScriptKeys[number];
+export type ActorScriptKey = (typeof actorScriptKeys)[number];
 
 export type Actor = {
   id: string;
@@ -105,6 +111,7 @@ export type Actor = {
   isPinned: boolean;
   persistent: boolean;
   collisionGroup: CollisionGroup;
+  collisionExtraFlags: CollisionExtraFlag[];
   prefabScriptOverrides: Record<string, ScriptEventArgsOverride>;
   script: ScriptEvent[];
   startScript: ScriptEvent[];
@@ -131,7 +138,7 @@ export type ActorNormalized = Omit<
   hit3Script: string[];
 };
 
-export type ActorFieldsOmittedFromPrefab =
+type ActorFieldsOmittedFromPrefab =
   | "prefabId"
   | "x"
   | "y"
@@ -148,7 +155,7 @@ export type ActorPrefabNormalized = Omit<
 >;
 
 export const triggerScriptKeys = ["script", "leaveScript"] as const;
-export type TriggerScriptKey = typeof triggerScriptKeys[number];
+export type TriggerScriptKey = (typeof triggerScriptKeys)[number];
 
 export type Trigger = {
   id: string;
@@ -170,7 +177,7 @@ export type TriggerNormalized = Omit<Trigger, "script" | "leaveScript"> & {
   leaveScript: string[];
 };
 
-export type TriggerFieldsOmittedFromPrefab =
+type TriggerFieldsOmittedFromPrefab =
   | "prefabId"
   | "x"
   | "y"
@@ -359,7 +366,7 @@ export type Metasprite = {
   tiles: string[];
 };
 
-export type MetaspriteData = Omit<Metasprite, "tiles"> & {
+type MetaspriteData = Omit<Metasprite, "tiles"> & {
   tiles: MetaspriteTile[];
 };
 
@@ -371,7 +378,7 @@ export type SpriteState = {
   animations: string[];
 };
 
-export type SpriteStateData = Omit<SpriteState, "animations"> & {
+type SpriteStateData = Omit<SpriteState, "animations"> & {
   animations: SpriteAnimationData[];
 };
 
@@ -404,6 +411,7 @@ export type SpriteSheet = {
   boundsHeight: number;
   animSpeed: number | null;
   states: SpriteStateData[];
+  spriteMode?: SpriteModeSetting;
 };
 
 export type SpriteSheetNormalized = Omit<SpriteSheet, "states"> & {
@@ -423,7 +431,7 @@ export const sceneScriptKeys = [
   "playerHit2Script",
   "playerHit3Script",
 ] as const;
-export type SceneScriptKey = typeof sceneScriptKeys[number];
+export type SceneScriptKey = (typeof sceneScriptKeys)[number];
 
 export type Scene = {
   id: string;
@@ -445,6 +453,7 @@ export type Scene = {
   autoFadeSpeed: number | null;
   autoFadeEventCollapse?: boolean;
   parallax?: SceneParallaxLayer[];
+  scrollBounds?: SceneBoundsRect;
   playerSpriteSheetId?: string;
   actors: Actor[];
   triggers: Trigger[];
@@ -452,6 +461,7 @@ export type Scene = {
   playerHit1Script: ScriptEvent[];
   playerHit2Script: ScriptEvent[];
   playerHit3Script: ScriptEvent[];
+  spriteMode?: SpriteModeSetting;
 };
 
 export type SceneNormalized = Omit<
@@ -514,7 +524,7 @@ export interface EntitiesState {
   engineFieldValues: EntityState<EngineFieldValue, string>;
 }
 
-export interface ScriptEventFieldCondition {
+interface ScriptEventFieldCondition {
   key: string;
   ne?: unknown;
   eq?: unknown;
@@ -528,22 +538,22 @@ export interface ScriptEventFieldCondition {
   parallaxEnabled?: boolean;
 }
 
-export const distanceUnitTypes = ["tiles", "pixels"] as const;
-export const timeUnitTypes = ["time", "frames"] as const;
-export const gridUnitTypes = ["8px", "16px"] as const;
+const distanceUnitTypes = ["tiles", "pixels"] as const;
+const timeUnitTypes = ["time", "frames"] as const;
+const gridUnitTypes = ["8px", "16px"] as const;
 export const unitTypes = [
   ...distanceUnitTypes,
   ...timeUnitTypes,
   ...gridUnitTypes,
 ] as const;
 
-export type UnitType = typeof unitTypes[number];
-export type DistanceUnitType = typeof distanceUnitTypes[number];
-export type TimeUnitType = typeof timeUnitTypes[number];
-export type GridUnitType = typeof gridUnitTypes[number];
+export type UnitType = (typeof unitTypes)[number];
+export type DistanceUnitType = (typeof distanceUnitTypes)[number];
+export type TimeUnitType = (typeof timeUnitTypes)[number];
+export type GridUnitType = (typeof gridUnitTypes)[number];
 
 export const movementTypes = ["horizontal", "vertical", "diagonal"] as const;
-export type MovementType = typeof movementTypes[number];
+export type MovementType = (typeof movementTypes)[number];
 
 export interface ScriptEventFieldSchema {
   label?: string | React.ReactNode;
@@ -596,5 +606,3 @@ export interface ScriptEventFieldSchema {
   labelVariant?: string;
   filters?: Record<string, unknown>;
 }
-
-export type EntityKey = keyof EntitiesState;

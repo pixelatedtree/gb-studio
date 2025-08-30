@@ -4,7 +4,7 @@ import { UnitType } from "shared/lib/entities/entitiesTypes";
 import styled from "styled-components";
 import { StyledInput } from "./style";
 
-export interface NumberInputProps
+interface NumberInputProps
   extends React.DetailedHTMLProps<
     React.InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
@@ -43,7 +43,7 @@ export const NumberInput: FC<NumberInputProps> = ({
       setStringValue(newStringValue);
       onChange?.(e);
     },
-    [onChange]
+    [onChange],
   );
 
   const onBlurInternal = useCallback(
@@ -51,12 +51,13 @@ export const NumberInput: FC<NumberInputProps> = ({
       setStringValue(valueToString(value));
       onBlur?.(e);
     },
-    [onBlur, value]
+    [onBlur, value],
   );
 
   useEffect(() => {
     const newStringValue = valueToString(value);
     if (
+      document.activeElement !== inputRef.current &&
       stringValue !== newStringValue &&
       (newStringValue !== "0" || document.activeElement !== inputRef.current)
     ) {

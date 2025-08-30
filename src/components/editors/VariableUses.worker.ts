@@ -1,4 +1,3 @@
-import { lexText } from "shared/lib/compiler/lexText";
 import {
   actorName,
   customEventName,
@@ -16,7 +15,6 @@ import {
   TriggerPrefabNormalized,
 } from "shared/lib/entities/entitiesTypes";
 import { L10NLookup, setL10NData } from "shared/lib/lang/l10n";
-import tokenizer from "shared/lib/rpn/tokenizer";
 import {
   ScriptEventDefs,
   isScriptValueField,
@@ -100,7 +98,7 @@ workerCtx.onmessage = async (evt) => {
 
   const isVariableInArg = (
     scriptEvent: ScriptEventNormalized,
-    arg: string
+    arg: string,
   ): boolean => {
     const args = scriptEvent.args;
     if (!args) {
@@ -134,7 +132,7 @@ workerCtx.onmessage = async (evt) => {
       }
     } else if (field.type === "text" || field.type === "textarea") {
       const allText = String(
-        Array.isArray(argValue) ? argValue.join("|") : argValue
+        Array.isArray(argValue) ? argValue.join("|") : argValue,
       );
       if (variableInDialogueText(variableId, allText)) {
         return true;
@@ -229,7 +227,7 @@ workerCtx.onmessage = async (evt) => {
           useLookup[trigger.id] = true;
         }
       }
-    }
+    },
   );
 
   Object.values(customEventsLookup).forEach((customEvent, customEventIndex) => {
@@ -265,7 +263,7 @@ workerCtx.onmessage = async (evt) => {
             useLookup[customEvent.id] = true;
           }
         }
-      }
+      },
     );
   });
 

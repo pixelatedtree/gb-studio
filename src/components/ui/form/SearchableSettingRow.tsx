@@ -1,7 +1,7 @@
 import React, { FC, ReactNode } from "react";
 import { SettingRow } from "./SettingRow";
 
-export interface SearchableSettingRowProps {
+interface SearchableSettingRowProps {
   searchTerm?: string;
   searchMatches?: string[];
   children?: ReactNode;
@@ -18,7 +18,7 @@ export const SearchableSettingRow: FC<SearchableSettingRowProps> = ({
   }
   const upperSearchTerm = searchTerm.toLocaleUpperCase();
   const match = searchMatches.find((s) =>
-    s.toLocaleUpperCase().includes(upperSearchTerm)
+    s?.toLocaleUpperCase().includes(upperSearchTerm),
   );
   if (match) {
     return component;

@@ -1,7 +1,7 @@
 import React, { FC, ReactNode } from "react";
 import { Card } from "./Card";
 
-export interface SettingsSectionProps {
+interface SettingsSectionProps {
   searchTerm?: string;
   searchMatches?: string[];
   children?: ReactNode;
@@ -18,7 +18,7 @@ export const SearchableCard: FC<SettingsSectionProps> = ({
   }
   const upperSearchTerm = searchTerm.toLocaleUpperCase();
   const match = searchMatches.find((s) =>
-    s.toLocaleUpperCase().includes(upperSearchTerm)
+    s?.toLocaleUpperCase().includes(upperSearchTerm),
   );
   if (match) {
     return component;

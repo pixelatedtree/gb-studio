@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import editorActions from "store/features/editor/editorActions";
 
 export type PianoRollToolType = "pencil" | "eraser" | "selection" | null;
-export interface TrackerState {
+interface TrackerState {
   // status: "loading" | "error" | "loaded" | null,
   // error?: string;
   playing: boolean;
@@ -83,7 +83,7 @@ const trackerSlice = createSlice({
     },
     setDefaultInstruments: (
       state,
-      _action: PayloadAction<[number, number, number, number]>
+      _action: PayloadAction<[number, number, number, number]>,
     ) => {
       state.defaultInstruments = _action.payload;
     },
@@ -103,7 +103,7 @@ const trackerSlice = createSlice({
     },
     setDefaultStartPlaybackPosition: (
       state,
-      _action: PayloadAction<[number, number]>
+      _action: PayloadAction<[number, number]>,
     ) => {
       state.startPlaybackPosition = _action.payload;
       state.defaultStartPlaybackPosition = _action.payload;

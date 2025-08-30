@@ -12,7 +12,7 @@ import { ThemeInterface } from "ui/theme/ThemeInterface";
 import { ListItem } from "./ListItem";
 import { getEventNodeName } from "renderer/lib/helpers/dom";
 
-export interface FlatListItem {
+interface FlatListItem {
   id: string;
   name: string;
 }
@@ -33,7 +33,7 @@ interface RowProps<T extends FlatListItem> {
   };
 }
 
-export interface FlatListProps<T extends FlatListItem> {
+interface FlatListProps<T extends FlatListItem> {
   readonly height: number;
   readonly items: T[];
   readonly selectedId?: string;
@@ -93,7 +93,7 @@ export const FlatList = <T extends FlatListItem>({
 }: FlatListProps<T>) => {
   const typedSetSelectedId = setSelectedId as <T extends FlatListItem>(
     id: string,
-    item: T
+    item: T,
   ) => void | undefined;
   const typedItems = items as T[];
 
@@ -139,7 +139,7 @@ export const FlatList = <T extends FlatListItem>({
         setSelectedId?.(nextItem.id, nextItem);
         setFocus(nextItem.id);
       }
-    }, 150)
+    }, 150),
   );
 
   const throttledPrev = useRef(
@@ -151,7 +151,7 @@ export const FlatList = <T extends FlatListItem>({
         setSelectedId?.(nextItem.id, nextItem);
         setFocus(nextItem.id);
       }
-    }, 150)
+    }, 150),
   );
 
   const handleSearch = (key: string) => {

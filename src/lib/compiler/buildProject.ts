@@ -1,19 +1,16 @@
 import fs from "fs-extra";
 import { binjgbRoot } from "consts";
 import copy from "lib/helpers/fsCopy";
-import type {
-  EngineFieldSchema,
-  SceneTypeSchema,
-} from "store/features/engine/engineState";
 import { ProjectResources } from "shared/lib/resources/types";
 import { buildRunner } from "./buildRunner";
+import { EngineSchema } from "lib/project/loadEngineSchema";
 
 type BuildOptions = {
   buildType: "rom" | "web" | "pocket";
   projectRoot: string;
   tmpPath: string;
-  engineFields: EngineFieldSchema[];
-  sceneTypes: SceneTypeSchema[];
+  engineSchema: EngineSchema;
+  romFilename: string;
   outputRoot: string;
   make?: boolean;
   debugEnabled?: boolean;
@@ -30,14 +27,14 @@ const buildProject = async (
     buildType = "rom",
     projectRoot = "/tmp",
     tmpPath = "/tmp",
-    engineFields = [],
-    sceneTypes = [],
+    engineSchema,
     outputRoot = "/tmp/testing",
+    romFilename,
     debugEnabled = false,
     make = true,
     progress = (_msg: string) => {},
     warnings = (_msg: string) => {},
-  }: BuildOptions
+  }: BuildOptions,
 ) => {
   cancelling = false;
 
@@ -45,10 +42,10 @@ const buildProject = async (
     project,
     buildType,
     projectRoot,
-    engineFields,
-    sceneTypes,
+    engineSchema,
     tmpPath,
     outputRoot,
+    romFilename,
     debugEnabled,
     make,
     progress,
@@ -63,14 +60,12 @@ const buildProject = async (
   }
 
   if (buildType === "web") {
-    const colorOnly = project.settings.colorMode === "color";
     const colorCorrection =
       project.settings.colorCorrection === "default" ? 2 : 0;
-    const gameFile = colorOnly ? "game.gbc" : "game.gb";
     await copy(binjgbRoot, `${outputRoot}/build/web`);
     await copy(
-      `${outputRoot}/build/rom/${gameFile}`,
-      `${outputRoot}/build/web/rom/${gameFile}`
+      `${outputRoot}/build/rom/${romFilename}`,
+      `${outputRoot}/build/web/rom/${romFilename}`,
     );
     const sanitize = (s: string) => String(s || "").replace(/["<>]/g, "");
     const projectName = sanitize(project.metadata.name);
@@ -102,10 +97,10 @@ const buildProject = async (
     const scriptJs = (
       await fs.readFile(`${outputRoot}/build/web/js/script.js`, "utf8")
     )
-      .replace(/ROM_FILENAME = "[^"]*"/g, `ROM_FILENAME = "rom/${gameFile}"`)
+      .replace(/ROM_FILENAME = "[^"]*"/g, `ROM_FILENAME = "rom/${romFilename}"`)
       .replace(
         /CGB_COLOR_CURVE = [0-9]+/g,
-        `CGB_COLOR_CURVE = ${colorCorrection}`
+        `CGB_COLOR_CURVE = ${colorCorrection}`,
       );
 
     await fs.writeFile(`${outputRoot}/build/web/index.html`, html);
@@ -113,8 +108,8 @@ const buildProject = async (
   } else if (buildType === "pocket") {
     await fs.mkdir(`${outputRoot}/build/pocket`);
     await copy(
-      `${outputRoot}/build/rom/game.pocket`,
-      `${outputRoot}/build/pocket/game.pocket`
+      `${outputRoot}/build/rom/${romFilename}`,
+      `${outputRoot}/build/pocket/${romFilename}`,
     );
   }
   return compiledData;

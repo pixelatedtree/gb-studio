@@ -20,7 +20,7 @@ interface ScriptEventFormMathAreaProps {
   onChange: (newValue: string) => void;
 }
 
-export const namedConstants = (constants: Constant[]): NamedConstant[] => {
+const namedConstants = (constants: Constant[]): NamedConstant[] => {
   return constants.map((constant, constantIndex) => ({
     id: constant.id,
     name: constantName(constant, constantIndex),
@@ -37,10 +37,10 @@ const ScriptEventFormMathArea: FC<ScriptEventFormMathAreaProps> = ({
   const context = useContext(ScriptEditorContext);
   const [variables, setVariables] = useState<NamedVariable[]>([]);
   const variablesLookup = useAppSelector((state) =>
-    variableSelectors.selectEntities(state)
+    variableSelectors.selectEntities(state),
   );
   const customEvent = useAppSelector((state) =>
-    customEventSelectors.selectById(state, entityId)
+    customEventSelectors.selectById(state, entityId),
   );
   const allConstants = useAppSelector(constantSelectors.selectAll);
 
@@ -48,7 +48,7 @@ const ScriptEventFormMathArea: FC<ScriptEventFormMathAreaProps> = ({
 
   useEffect(() => {
     setVariables(
-      namedVariablesByContext(context, variablesLookup, customEvent)
+      namedVariablesByContext(context, variablesLookup, customEvent),
     );
   }, [entityId, variablesLookup, context, customEvent]);
 

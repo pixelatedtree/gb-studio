@@ -73,8 +73,8 @@ export const decompress8bitNumberString = (str: string): number[] => {
   return arr;
 };
 
-export const decompressSceneResource = (
-  scene: CompressedSceneResourceWithChildren
+const decompressSceneResource = (
+  scene: CompressedSceneResourceWithChildren,
 ): SceneResource => {
   return {
     ...scene,
@@ -82,8 +82,8 @@ export const decompressSceneResource = (
   };
 };
 
-export const decompressBackgroundResource = (
-  background: CompressedBackgroundResource
+const decompressBackgroundResource = (
+  background: CompressedBackgroundResource,
 ): BackgroundResource => {
   return {
     ...background,
@@ -92,19 +92,19 @@ export const decompressBackgroundResource = (
 };
 
 export const decompressProjectResources = (
-  compressedResources: CompressedProjectResources
+  compressedResources: CompressedProjectResources,
 ): ProjectResources => {
   return {
     ...compressedResources,
     scenes: compressedResources.scenes.map(decompressSceneResource),
     backgrounds: compressedResources.backgrounds.map(
-      decompressBackgroundResource
+      decompressBackgroundResource,
     ),
   };
 };
 
 export const compressSceneResource = (
-  scene: SceneResource
+  scene: SceneResource,
 ): CompressedSceneResourceWithChildren => {
   return {
     ...scene,
@@ -113,7 +113,7 @@ export const compressSceneResource = (
 };
 
 export const compressBackgroundResource = (
-  background: BackgroundResource
+  background: BackgroundResource,
 ): CompressedBackgroundResource => {
   return {
     ...background,
@@ -122,7 +122,7 @@ export const compressBackgroundResource = (
 };
 
 export const compressProjectResources = (
-  resources: ProjectResources
+  resources: ProjectResources,
 ): CompressedProjectResources => {
   return {
     ...resources,

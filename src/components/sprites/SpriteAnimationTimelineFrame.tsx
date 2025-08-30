@@ -13,7 +13,7 @@ interface CardWrapperProps {
   $isDragging?: boolean;
 }
 
-export const CardWrapper = styled.div<CardWrapperProps>`
+const CardWrapper = styled.div<CardWrapperProps>`
   width: 50px;
   height: 50px;
   background-color: #ffffff;
@@ -84,15 +84,14 @@ export const SpriteAnimationTimelineFrame = ({
   const dispatch = useAppDispatch();
 
   const selectedAdditionalMetaspriteIds = useAppSelector(
-    (state) => state.editor.selectedAdditionalMetaspriteIds
+    (state) => state.editor.selectedAdditionalMetaspriteIds,
   );
 
-  const [contextMenu, setContextMenu] =
-    useState<{
-      x: number;
-      y: number;
-      menu: JSX.Element[];
-    }>();
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    menu: JSX.Element[];
+  }>();
 
   const onContextMenuClose = useCallback(() => {
     setContextMenu(undefined);
@@ -124,7 +123,7 @@ export const SpriteAnimationTimelineFrame = ({
       }
       setContextMenu({ x: e.pageX, y: e.pageY, menu });
     },
-    [renderContextMenu]
+    [renderContextMenu],
   );
 
   return (

@@ -16,7 +16,7 @@ const globAsync = promisify(glob);
 const VM2 = __non_webpack_require__("vm2");
 const NodeVM = VM2.NodeVM;
 
-export type ScriptEventHelperDef =
+type ScriptEventHelperDef =
   | {
       type: "position";
       x: string;
@@ -30,6 +30,8 @@ export type ScriptEventHelperDef =
       type: "camera";
       x: string;
       y: string;
+      width?: string;
+      height?: string;
       units?: string;
     }
   | {
@@ -78,7 +80,7 @@ export type ScriptEventHelperDef =
       location: string;
     };
 
-export type ScriptEventPresetValue = {
+type ScriptEventPresetValue = {
   id: string;
   name: string;
   description?: string;
@@ -87,7 +89,7 @@ export type ScriptEventPresetValue = {
   values: Record<string, unknown>;
 };
 
-export type UserPresetsGroup = {
+type UserPresetsGroup = {
   id: string;
   label: string;
   fields: string[];
@@ -114,17 +116,17 @@ export interface ScriptEventDef {
   fieldsLookup: Record<string, ScriptEventFieldSchema>;
 }
 
-export type ScriptEventHandlerFieldSchema = ScriptEventFieldSchema & {
+type ScriptEventHandlerFieldSchema = ScriptEventFieldSchema & {
   postUpdateFn?: (
     newArgs: Record<string, unknown>,
-    prevArgs: Record<string, unknown>
+    prevArgs: Record<string, unknown>,
   ) => void | Record<string, unknown>;
 };
 
-export type ScriptEventHandler = ScriptEventDef & {
+type ScriptEventHandler = ScriptEventDef & {
   autoLabel?: (
     lookup: (key: string) => string,
-    args: Record<string, unknown>
+    args: Record<string, unknown>,
   ) => string;
   compile: (input: unknown, helpers: unknown) => void;
   fields: ScriptEventHandlerFieldSchema[];
@@ -165,7 +167,7 @@ const vm = new NodeVM({
 });
 
 const loadScriptEventHandler = async (
-  path: string
+  path: string,
 ): Promise<ScriptEventHandler> => {
   const handlerCode = await readFile(path, "utf8");
 
@@ -176,7 +178,7 @@ const loadScriptEventHandler = async (
     throw new Error(
       `Failed to load script event handler at ${path}: ${
         (error as Error).message
-      }`
+      }`,
     );
   }
 
@@ -219,12 +221,12 @@ const loadScriptEventHandler = async (
       .concat(handler.userPresetsIgnore ?? []);
 
     const missingFields = allFields.filter(
-      (key) => !presetFields.includes(key)
+      (key) => !presetFields.includes(key),
     );
 
     if (missingFields.length > 0) {
       console.error(
-        `${handler.id} defined userPresetsGroups but did not include some fields in either userPresetsGroups or userPresetsIgnore`
+        `${handler.id} defined userPresetsGroups but did not include some fields in either userPresetsGroups or userPresetsIgnore`,
       );
       console.error("Missing fields: " + missingFields.join(", "));
     }
@@ -237,7 +239,7 @@ const loadAllScriptEventHandlers = async (projectRoot: string) => {
   const corePaths = await globAsync(`${eventsRoot}/event*.js`);
 
   const pluginPaths = await globAsync(
-    `${projectRoot}/plugins/*/**/events/event*.js`
+    `${projectRoot}/plugins/*/**/events/event*.js`,
   );
 
   const eventHandlers: ScriptEventHandlers = {};

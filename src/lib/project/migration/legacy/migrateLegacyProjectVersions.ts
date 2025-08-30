@@ -59,7 +59,7 @@ export const LATEST_LEGACY_PROJECT_MINOR_VERSION = "1";
 
 const ensureProjectAssetSync = (
   relativePath: string,
-  { projectRoot }: { projectRoot: string }
+  { projectRoot }: { projectRoot: string },
 ) => {
   const projectPath = `${projectRoot}/${relativePath}`;
   const defaultPath = `${projectTemplatesRoot}/gbhtml/${relativePath}`;
@@ -95,7 +95,7 @@ const generateMigrateMeta =
 
 const applyEventsMigration = (
   data: ProjectData,
-  fn: (event: ScriptEvent) => ScriptEvent
+  fn: (event: ScriptEvent) => ScriptEvent,
 ): ProjectData => {
   return {
     ...data,
@@ -125,7 +125,7 @@ type ProjectDataV1 = Omit<ProjectData, "spriteSheets" | "scenes"> & {
 export const migrateFrom1To110Actors = (data: ProjectDataV1): ProjectData => {
   const actorDefaultFrame = (actor: any) => {
     const actorSprite = data.spriteSheets.find(
-      (sprite: any) => sprite.id === actor.spriteSheetId
+      (sprite: any) => sprite.id === actor.spriteSheetId,
     );
     const isActor =
       actorSprite?.numFrames === 3 || actorSprite?.numFrames === 6;
@@ -233,7 +233,7 @@ export const migrateFrom110To120Event = (
     false?: ScriptEvent[];
     showIfKey?: string;
     showIfValue?: unknown;
-  }
+  },
 ) => {
   let newEvent = event;
   // Migrate math events
@@ -313,7 +313,7 @@ export const migrateFrom110To120Event = (
         },
         newEvent.false && {
           false: mapScript(newEvent.false, migrateFrom110To120Event),
-        }
+        },
       ),
       true: undefined,
       false: undefined,
@@ -376,7 +376,7 @@ export const migrateFrom120To200Actors = (
     scenes: (Omit<Scene, "actors"> & {
       actors: (Actor & { movementType?: string })[];
     })[];
-  }
+  },
 ): ProjectData => {
   return {
     ...data,
@@ -607,7 +607,7 @@ const migrateFrom120To200Events = (data: ProjectData): ProjectData => {
  * as the value 0xF
  */
 export const migrateFrom120To200Collisions = (
-  data: ProjectData
+  data: ProjectData,
 ): ProjectData => {
   const backgroundLookup = indexById(data.backgrounds);
 
@@ -660,7 +660,7 @@ export const migrateFrom120To200Collisions = (
  * to use the new default
  */
 export const migrateFrom200r1To200r2Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
   if (event.args && event.command === "EVENT_PLAYER_SET_SPRITE") {
@@ -694,9 +694,7 @@ const migrateFrom200r1To200r2Events = (data: ProjectData): ProjectData => {
  * a single input at once. This migration updates existing
  * EVENT_SET_INPUT_SCRIPT events to use array values
  */
-export const migrateFrom200r2To200r3Event = (
-  event: ScriptEvent
-): ScriptEvent => {
+const migrateFrom200r2To200r3Event = (event: ScriptEvent): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
   if (event.args && event.command === "EVENT_SET_INPUT_SCRIPT") {
     return migrateMeta({
@@ -729,9 +727,7 @@ const migrateFrom200r2To200r3Events = (data: ProjectData): ProjectData => {
  * Version 2.0.0 r3 used a separate event for handling updating the
  * fade style, this has now been merged into EVENT_ENGINE_FIELD_SET
  */
-export const migrateFrom200r3To200r4Event = (
-  event: ScriptEvent
-): ScriptEvent => {
+const migrateFrom200r3To200r4Event = (event: ScriptEvent): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
   if (event.args && event.command === "EVENT_FADE_SETTINGS") {
     return migrateMeta({
@@ -773,8 +769,8 @@ type ProjectDataV200r3 = ProjectData & {
  * Version 2.0.0 r3 stored the default fade style in settings, this
  * has now been moved to an engine field value
  */
-export const migrateFrom200r3To200r4EngineFieldValues = (
-  data: ProjectDataV200r3
+const migrateFrom200r3To200r4EngineFieldValues = (
+  data: ProjectDataV200r3,
 ): ProjectData => {
   return {
     ...data,
@@ -783,7 +779,7 @@ export const migrateFrom200r3To200r4EngineFieldValues = (
       {
         id: "fade_style",
         value: data.settings.defaultFadeStyle === "black" ? 1 : 0,
-      }
+      },
     ),
   };
 };
@@ -792,9 +788,7 @@ export const migrateFrom200r3To200r4EngineFieldValues = (
  * Version 2.0.0 r4 used string values for animSpeed and moveSpeed,
  * animSpeed is now number|null and moveSpeed is number
  */
-export const migrateFrom200r4To200r5Event = (
-  event: ScriptEvent
-): ScriptEvent => {
+const migrateFrom200r4To200r5Event = (event: ScriptEvent): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
   if (event.args && event.command === "EVENT_ACTOR_SET_ANIMATION_SPEED") {
     let speed = event.args.speed;
@@ -966,9 +960,7 @@ const migrateAnimSpeedr6r7 = (original: unknown) => {
  * rather than arbitrary speed values for anim/move speeds.
  * Save event also now includes an OnSave script.
  */
-export const migrateFrom200r6To200r7Event = (
-  event: ScriptEvent
-): ScriptEvent => {
+const migrateFrom200r6To200r7Event = (event: ScriptEvent): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
   if (event.args && event.command === "EVENT_ACTOR_SET_ANIMATION_SPEED") {
@@ -1075,14 +1067,14 @@ type ProjectDataV200r6 = Omit<ProjectData, "scenes"> & {
  * Version 2.0.0 r7 moves image color data into background entity rather than scene
  */
 const migrateFrom200r6To200r7Backgrounds = (
-  data: ProjectDataV200r6
+  data: ProjectDataV200r6,
 ): ProjectData => {
   return {
     ...data,
     backgrounds: data.backgrounds.map((background) => {
       // Find an existing scene using this background and copy the tile colors used
       const scene = data.scenes.find(
-        (scene) => scene.backgroundId === background.id
+        (scene) => scene.backgroundId === background.id,
       );
       const tileColors = (scene && scene.tileColors) || [];
       return {
@@ -1141,7 +1133,7 @@ type ProjectDataV200r7 = Omit<ProjectData, "spriteSheets"> & {
  * Version 2.0.0 r8 moves sprite animations to be wrapped within states array
  */
 const migrateFrom200r7To200r8Sprites = (
-  data: ProjectDataV200r7
+  data: ProjectDataV200r7,
 ): ProjectData => {
   return {
     ...data,
@@ -1170,7 +1162,7 @@ const migrateFrom200r7To200r8Sprites = (
  * UI Palette merged into defaultBackgroundPaletteIds.
  */
 const migrateFrom200r6To200r7Settings = (
-  data: ProjectDataV200r6
+  data: ProjectDataV200r6,
 ): ProjectData => {
   return {
     ...data,
@@ -1237,7 +1229,7 @@ const migrateFrom200r8To200r9Events = (data: ProjectData): ProjectData => {
 };
 
 export const migrateFrom200r9To200r10Triggers = (
-  data: ProjectData
+  data: ProjectData,
 ): ProjectData => {
   return {
     ...data,
@@ -1257,9 +1249,7 @@ export const migrateFrom200r9To200r10Triggers = (
 
 /* Version 2.0.0 r11 adds additional parameters to EVENT_LAUNCH_PROJECTILE
  */
-export const migrateFrom200r10To200r11Event = (
-  event: ScriptEvent
-): ScriptEvent => {
+const migrateFrom200r10To200r11Event = (event: ScriptEvent): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
   if (event.args && event.command === "EVENT_LAUNCH_PROJECTILE") {
@@ -1312,9 +1302,7 @@ const migrateFrom200r10To200r11Events = (data: ProjectData): ProjectData => {
 
 /* Version 2.0.0 r12 adds variable support for camera events + ability to lock per axis
  */
-export const migrateFrom200r11To200r12Event = (
-  event: ScriptEvent
-): ScriptEvent => {
+const migrateFrom200r11To200r12Event = (event: ScriptEvent): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
   if (event.args && event.command === "EVENT_CAMERA_MOVE_TO") {
@@ -1360,9 +1348,7 @@ const migrateFrom200r11To200r12Events = (data: ProjectData): ProjectData => {
 
 /* Version 2.0.0 r13 adds multiple save slots for save/load events
  */
-export const migrateFrom200r12To200r13Event = (
-  event: ScriptEvent
-): ScriptEvent => {
+const migrateFrom200r12To200r13Event = (event: ScriptEvent): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
   if (
@@ -1398,9 +1384,7 @@ const migrateFrom200r12To200r13Events = (data: ProjectData): ProjectData => {
 
 /* Version 2.0.0 r14 deprecates weapon attack event, replacing with launch projectile
  */
-export const migrateFrom200r13To200r14Event = (
-  event: ScriptEvent
-): ScriptEvent => {
+const migrateFrom200r13To200r14Event = (event: ScriptEvent): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
   if (event.args && event.command === "EVENT_WEAPON_ATTACK") {
@@ -1438,7 +1422,7 @@ const migrateFrom200r13To200r14Events = (data: ProjectData): ProjectData => {
 
 /* Version 2.0.0 r15 migrates old emote events to new emotes format (and creates default emote pngs if missing)
  */
-export const migrateFrom200r14To200r15Event =
+const migrateFrom200r14To200r15Event =
   (emotesData: EmoteData[]) =>
   (event: ScriptEvent): ScriptEvent => {
     const migrateMeta = generateMigrateMeta(event);
@@ -1460,7 +1444,7 @@ export const migrateFrom200r14To200r15Event =
 
 const migrateFrom200r14Tor15Emotes = (
   data: ProjectData,
-  projectRoot: string
+  projectRoot: string,
 ): ProjectData => {
   if (data.emotes || !projectRoot) {
     return data;
@@ -1496,14 +1480,14 @@ const migrateFrom200r14Tor15Emotes = (
     scenes: mapScenesScript(
       data.scenes,
       {},
-      migrateFrom200r14To200r15Event(emotesData)
+      migrateFrom200r14To200r15Event(emotesData),
     ),
     customEvents: (data.customEvents || []).map((customEvent) => {
       return {
         ...customEvent,
         script: mapScript(
           customEvent.script,
-          migrateFrom200r14To200r15Event(emotesData)
+          migrateFrom200r14To200r15Event(emotesData),
         ),
       };
     }),
@@ -1512,7 +1496,7 @@ const migrateFrom200r14Tor15Emotes = (
 
 /* Version 2.0.0 r16 migrates old avatar events to new avatars format (and copies sprites to correct folder)
  */
-export const migrateFrom200r15To200r16Event =
+const migrateFrom200r15To200r16Event =
   (avatarsIdLookup: Record<string, string>) =>
   (event: ScriptEvent): ScriptEvent => {
     const migrateMeta = generateMigrateMeta(event);
@@ -1533,7 +1517,7 @@ export const migrateFrom200r15To200r16Event =
 
 const migrateFrom200r15Tor16Avatars = (
   data: ProjectData,
-  projectRoot: string
+  projectRoot: string,
 ): ProjectData => {
   if (data.avatars || !projectRoot) {
     return data;
@@ -1548,7 +1532,7 @@ const migrateFrom200r15Tor16Avatars = (
 
   walkScenesScripts(data.scenes, undefined, handleEvent);
   data.customEvents.forEach((customEvent) =>
-    walkScript(customEvent.script, undefined, handleEvent)
+    walkScript(customEvent.script, undefined, handleEvent),
   );
 
   const uniqueAvatarIds = uniq(avatarIds);
@@ -1568,12 +1552,15 @@ const migrateFrom200r15Tor16Avatars = (
     })
     .filter((i) => i) as AvatarData[];
 
-  const avatarsIdLookup = uniqueAvatarIds.reduce((memo, oldId, index) => {
-    const avatar = avatarsData[index];
-    const newId = avatar && avatar.id;
-    memo[oldId] = newId;
-    return memo;
-  }, {} as Record<string, string>);
+  const avatarsIdLookup = uniqueAvatarIds.reduce(
+    (memo, oldId, index) => {
+      const avatar = avatarsData[index];
+      const newId = avatar && avatar.id;
+      memo[oldId] = newId;
+      return memo;
+    },
+    {} as Record<string, string>,
+  );
 
   avatarsData.forEach((avatar) => {
     if (avatar) {
@@ -1594,14 +1581,14 @@ const migrateFrom200r15Tor16Avatars = (
     scenes: mapScenesScript(
       data.scenes,
       {},
-      migrateFrom200r15To200r16Event(avatarsIdLookup)
+      migrateFrom200r15To200r16Event(avatarsIdLookup),
     ),
     customEvents: (data.customEvents || []).map((customEvent) => {
       return {
         ...customEvent,
         script: mapScript(
           customEvent.script,
-          migrateFrom200r15To200r16Event(avatarsIdLookup)
+          migrateFrom200r15To200r16Event(avatarsIdLookup),
         ),
       };
     }),
@@ -1612,7 +1599,7 @@ const migrateFrom200r15Tor16Avatars = (
  */
 const migrateFrom200r16Tor17Fonts = (
   data: ProjectData,
-  projectRoot: string
+  projectRoot: string,
 ): ProjectData => {
   if (data.fonts || !projectRoot) {
     return data;
@@ -1646,9 +1633,7 @@ const migrateFrom200r16Tor17Fonts = (
 
 /* Version 3.0.0 r2 migrates old hide/show events to deactivate/activate to better match previous functionality
  */
-export const migrateFrom300r1To300r2Event = (
-  event: ScriptEvent
-): ScriptEvent => {
+const migrateFrom300r1To300r2Event = (event: ScriptEvent): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
   if (event.args && event.command === "EVENT_ACTOR_HIDE") {
     return migrateMeta({
@@ -1705,7 +1690,7 @@ export const migrateFrom300r2To300r3 = (data: ProjectData): ProjectData => {
       return {
         ...customEvent,
         symbol: toValidSymbol(
-          `script_${customEvent.name || customEventIndex + 1}`
+          `script_${customEvent.name || customEventIndex + 1}`,
         ),
       };
     }),
@@ -1724,7 +1709,7 @@ export const migrateFrom300r2To300r3 = (data: ProjectData): ProjectData => {
  */
 export const migrateFrom300r3To310r1ScriptEvent = (
   event: ScriptEvent,
-  scriptEventDefs: ScriptEventDefs
+  scriptEventDefs: ScriptEventDefs,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
   if (event.args) {
@@ -1746,7 +1731,7 @@ export const migrateFrom300r3To310r1ScriptEvent = (
         }
         return memo;
       },
-      { ...event.args }
+      { ...event.args },
     );
     return migrateMeta({
       ...event,
@@ -1761,12 +1746,12 @@ export const migrateFrom300r3To310r1ScriptEvent = (
  */
 export const migrateFrom300r3To310r1Event = (
   event: ScriptEvent,
-  customEvents: CustomEvent[]
+  customEvents: CustomEvent[],
 ) => {
   const migrateMeta = generateMigrateMeta(event);
   if (event.args && event.command === "EVENT_CALL_CUSTOM_EVENT") {
     const customEvent = customEvents.find(
-      (c) => c.id === event.args?.customEventId
+      (c) => c.id === event.args?.customEventId,
     );
     if (!customEvent) {
       return event;
@@ -1786,7 +1771,7 @@ export const migrateFrom300r3To310r1Event = (
         delete memo[oldKey];
         return memo;
       },
-      { ...event.args }
+      { ...event.args },
     );
     return migrateMeta({
       ...event,
@@ -1811,12 +1796,12 @@ export const migrateFrom300r3To310r1Event = (
  */
 export const migrateFrom300r3To310r1 = (
   data: ProjectData,
-  scriptEventDefs: ScriptEventDefs
+  scriptEventDefs: ScriptEventDefs,
 ): ProjectData => {
   return {
     ...data,
     scenes: mapScenesScript(data.scenes, {}, (e) =>
-      migrateFrom300r3To310r1Event(e, data.customEvents)
+      migrateFrom300r3To310r1Event(e, data.customEvents),
     ),
     customEvents: data.customEvents.map((customEvent) => {
       return {
@@ -1834,13 +1819,13 @@ export const migrateFrom300r3To310r1 = (
             };
             return memo;
           },
-          {} as Record<string, CustomEventVariable>
+          {} as Record<string, CustomEventVariable>,
         ),
         script: mapScript(customEvent.script, (e) =>
           migrateFrom300r3To310r1Event(
             migrateFrom300r3To310r1ScriptEvent(e, scriptEventDefs),
-            data.customEvents
-          )
+            data.customEvents,
+          ),
         ),
       };
     }),
@@ -1850,7 +1835,7 @@ export const migrateFrom300r3To310r1 = (
 /* Version 3.1.0 r2 updates projectile events to set new fields as true by default
  */
 export const migrateFrom310r1To310r2Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
   if (event.args && event.command === "EVENT_LAUNCH_PROJECTILE") {
@@ -1881,9 +1866,7 @@ const migrateFrom310r1To310r2Events = (data: ProjectData): ProjectData => {
 
 /* Version 3.1.0 r3 updates For Loops to include comparison and operation selectors
  */
-export const migrateFrom310r2To310r3Event = (
-  event: ScriptEvent
-): ScriptEvent => {
+const migrateFrom310r2To310r3Event = (event: ScriptEvent): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
   if (event.args && event.command === "EVENT_LOOP_FOR") {
     return migrateMeta({
@@ -1915,7 +1898,7 @@ const migrateFrom310r2To310r3Events = (data: ProjectData): ProjectData => {
 /* Version 3.1.1 r1 updates timer events to include a timer context value defaulting to 1
  */
 export const migrateFrom310r3To311r1Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
   if (
@@ -1951,7 +1934,7 @@ const migrateFrom310r3To311r1Events = (data: ProjectData): ProjectData => {
 /* Version 3.2.0 r2 updates the camera shake event to include a magnitude value defaulting to 5
  */
 export const migrateFrom320r1To320r2Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
@@ -1991,7 +1974,7 @@ type ProjectDataV320r2 = ProjectData & {
 };
 
 export const migrateFrom320r2To330r1Settings = (
-  data: ProjectDataV320r2
+  data: ProjectDataV320r2,
 ): ProjectData => {
   return {
     ...data,
@@ -2006,7 +1989,7 @@ export const migrateFrom320r2To330r1Settings = (
  * have now become possible to implement with a single script value based option
  */
 export const migrateFrom330r2To330r3Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
@@ -2204,7 +2187,7 @@ const migrateFrom330r2To330r3Events = (data: ProjectData): ProjectData => {
 /* Version 3.3.0 r4 updates the Scene Change event to allow script values
  */
 export const migrateFrom330r3To330r4Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
@@ -2244,7 +2227,7 @@ const migrateFrom330r3To330r4Events = (data: ProjectData): ProjectData => {
 /* Version 3.3.0 r5 migrates events supporting property union types to the script value representation
  */
 export const migrateFrom330r4To330r5Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
   interface OldProperty {
@@ -2407,7 +2390,7 @@ const migrateFrom330r5To330r6Events = (data: ProjectData): ProjectData => {
 /* Version 3.3.0 r7 migrates events camera movement to use pixels per frame values
  */
 export const migrateFrom330r6To330r7Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
@@ -2464,7 +2447,7 @@ const migrateFrom330r6To330r7Events = (data: ProjectData): ProjectData => {
 /* Version 4.0.0 r2 handles migrating EVENT_ENGINE_FIELD_SET events from 3.3.0 correctly
  */
 export const migrateFrom400r1To400r2Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
@@ -2496,7 +2479,7 @@ export const migrateFrom400r1To400r2Event = (
  * to use script values for X/Y coordinates
  */
 export const migrateFrom400r2To400r3Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
@@ -2527,7 +2510,7 @@ export const migrateFrom400r2To400r3Event = (
 for flags instead of a string. 
  */
 export const migrateFrom400r3To400r4Event = (
-  event: ScriptEvent
+  event: ScriptEvent,
 ): ScriptEvent => {
   const migrateMeta = generateMigrateMeta(event);
 
@@ -2546,7 +2529,7 @@ export const migrateFrom400r3To400r4Event = (
 const migrateProject = (
   project: ProjectData,
   projectRoot: string,
-  scriptEventDefs: ScriptEventDefs
+  scriptEventDefs: ScriptEventDefs,
 ): ProjectData => {
   let data = { ...project };
   let version = project._version || "1.0.0";
@@ -2586,7 +2569,7 @@ const migrateProject = (
     }
     if (release === "3") {
       data = migrateFrom200r3To200r4EngineFieldValues(
-        data as ProjectDataV200r3
+        data as ProjectDataV200r3,
       );
       data = migrateFrom200r3To200r4Events(data);
       release = "4";

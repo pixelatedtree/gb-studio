@@ -13,8 +13,8 @@ export interface TemplatePlugin {
   description: string;
 }
 
-export const loadPlugin = async (
-  path: string
+const loadPlugin = async (
+  path: string,
 ): Promise<
   (JSON & { name: string; _resourceType: unknown; description?: string }) | null
 > => {
@@ -44,7 +44,7 @@ export class TemplateManager {
     this.pluginTemplates = {};
     const globalPluginsPath = getGlobalPluginsPath();
     const pluginPaths = await globAsync(
-      join(globalPluginsPath, "**/project.gbsproj")
+      join(globalPluginsPath, "**/project.gbsproj"),
     );
     for (const path of pluginPaths) {
       const template = await loadPlugin(path);

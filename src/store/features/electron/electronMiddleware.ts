@@ -54,7 +54,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
     } else if (editorActions.resizeNavigatorSidebar.match(action)) {
       API.settings.set(
         "navigatorSidebarWidth",
-        Math.max(NAVIGATOR_MIN_WIDTH, action.payload)
+        Math.max(NAVIGATOR_MIN_WIDTH, action.payload),
       );
     } else if (
       editorActions.setTool.match(action) &&
@@ -70,7 +70,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
           store.dispatch(
             settingsActions.editSettings({
               colorMode: "mixed",
-            })
+            }),
           );
           store.dispatch(action);
         });
@@ -104,7 +104,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
               line: 0,
               col: 0,
               stackTrace: "stack" in error ? String(error.stack) : "",
-            })
+            }),
           );
         }
       }
@@ -114,7 +114,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
       const state = store.getState();
       const customEvent = customEventSelectors.selectById(
         state,
-        action.payload.customEventId
+        action.payload.customEventId,
       );
 
       if (!customEvent) {
@@ -170,14 +170,14 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
             usedSceneIds.push(scene.id);
             usedEventIds.push(scriptEvent.id);
           }
-        }
+        },
       );
 
       const usedTotal = referenceIds.length;
 
       if (usedTotal > 0) {
         const sceneNames = uniq(
-          usedSceneIds.map((sceneId) => sceneName(sceneId))
+          usedSceneIds.map((sceneId) => sceneName(sceneId)),
         ).sort();
 
         // Display confirmation and stop delete if cancelled
@@ -186,6 +186,8 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
           .then((button) => {
             const cancelButton: DeleteScriptConfirmButton.cancel = 2;
             const deleteReferencesButton: DeleteScriptConfirmButton.deleteReferences = 1;
+            const deleteButton: DeleteScriptConfirmButton.delete = 0;
+
             if (button === cancelButton) {
               return;
             }
@@ -198,7 +200,9 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
                 },
               });
             }
-            return next(action);
+            if (button === deleteButton) {
+              return next(action);
+            }
           });
         return;
       }
@@ -206,7 +210,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
       const state = store.getState();
       const actorPrefab = actorPrefabSelectors.selectById(
         state,
-        action.payload.actorPrefabId
+        action.payload.actorPrefabId,
       );
 
       if (!actorPrefab) {
@@ -220,7 +224,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
 
       const actors = actorSelectors.selectAll(state);
       const usedActors = actors.filter(
-        (actor) => actor.prefabId === actorPrefab.id
+        (actor) => actor.prefabId === actorPrefab.id,
       );
       const usedTotal = usedActors.length;
 
@@ -237,7 +241,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
               entitiesActions.unpackActorPrefab({
                 actorId: usedActor.id,
                 force: true,
-              })
+              }),
             );
           }
 
@@ -262,7 +266,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
       const state = store.getState();
       const triggerPrefab = triggerPrefabSelectors.selectById(
         state,
-        action.payload.triggerPrefabId
+        action.payload.triggerPrefabId,
       );
 
       if (!triggerPrefab) {
@@ -276,7 +280,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
 
       const triggers = triggerSelectors.selectAll(state);
       const usedTriggers = triggers.filter(
-        (trigger) => trigger.prefabId === triggerPrefab.id
+        (trigger) => trigger.prefabId === triggerPrefab.id,
       );
       const usedTotal = usedTriggers.length;
 
@@ -293,7 +297,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
               entitiesActions.unpackTriggerPrefab({
                 triggerId: usedTrigger.id,
                 force: true,
-              })
+              }),
             );
           }
 
@@ -345,7 +349,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
 
       const constant = constantSelectors.selectById(
         state,
-        action.payload.constantId
+        action.payload.constantId,
       );
       if (!constant) {
         return;
@@ -391,7 +395,7 @@ const electronMiddleware: Middleware<Dispatch, RootState> =
             return next(action);
           });
         },
-        { once: true }
+        { once: true },
       );
       return;
     } else if (actions.showErrorBox.match(action)) {

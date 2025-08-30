@@ -1,9 +1,5 @@
 import { Font } from "shared/lib/entities/entitiesTypes";
-import {
-  encodeString,
-  FontData,
-  lexTextWithMapping,
-} from "shared/lib/helpers/fonts";
+import { FontData, lexTextWithMapping } from "shared/lib/helpers/fonts";
 import { assetURL } from "shared/lib/helpers/assets";
 import { TILE_SIZE } from "consts";
 
@@ -11,7 +7,7 @@ const DOLLAR_CHAR = 4;
 const HASH_CHAR = 3;
 const ZERO_CHAR = 16;
 
-export const isTransparent = (r: number, g: number, b: number): boolean => {
+const isTransparent = (r: number, g: number, b: number): boolean => {
   return (
     (r === 255 && b === 255 && g === 0) || (g === 255 && r === 0 && b === 0)
   );
@@ -21,7 +17,7 @@ export const drawFrame = (
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
   width: number,
-  height: number
+  height: number,
 ) => {
   ctx.drawImage(img, 0, 16, 8, 8, 0, (height - 1) * 8, 8, 8); // BL
   ctx.drawImage(img, 16, 16, 8, 8, (width - 1) * 8, (height - 1) * 8, 8, 8); // BR
@@ -46,7 +42,7 @@ export const drawFill = (
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
   width: number,
-  height: number
+  height: number,
 ) => {
   for (let i = 0; i < height; i++) {
     for (let j = 0; j < width; j++) {
@@ -122,7 +118,7 @@ export const drawText = (
   maxHeight: number,
   fontsData: Record<string, FontData>,
   defaultFontId: string,
-  fallbackFontId: string
+  fallbackFontId: string,
 ) => {
   let drawX = 0;
   let drawY = 0;
@@ -153,7 +149,7 @@ export const drawText = (
       drawX + xOffset,
       drawY + yOffset,
       font.widths[char],
-      8
+      8,
     );
     drawX += font.widths[char] ?? 0;
   };
@@ -161,14 +157,13 @@ export const drawText = (
   const textTokens = lexTextWithMapping(text, fontsData, font.id, false);
 
   textTokens.forEach((token) => {
-
     if (token.type === "text") {
       const string = token.previewValue ?? token.value;
       let i = 0;
 
       while (i < string.length) {
         const char = string[i];
-        
+
         // Newline - encodeString() above causes all newlines to be represented as \012
         if (
           char === "\\" &&
@@ -187,7 +182,7 @@ export const drawText = (
         const code = char.codePointAt(0) ?? 0;
         const charIndex =
           (code - (tileHeight < 16 ? 32 : 0)) % font.widths.length;
-        
+
         drawCharCode(charIndex);
 
         i++;

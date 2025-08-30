@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { IMEUnstyledInput } from "ui/form/IMEInput";
 import { CheckIcon } from "ui/icons/Icons";
 
-export const Input = styled(IMEUnstyledInput)`
+const Input = styled(IMEUnstyledInput)`
   background: ${(props) => props.theme.colors.input.background};
   color: ${(props) => props.theme.colors.input.text};
   min-width: 0;
@@ -19,7 +19,7 @@ export const Input = styled(IMEUnstyledInput)`
   border-radius: 4px;
 `;
 
-export const CompleteButton = styled.button`
+const CompleteButton = styled.button`
   z-index: 10000;
   position: relative;
   top: 0px;
@@ -69,7 +69,7 @@ export const RenameInput = ({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setName(e.currentTarget.value);
     },
-    []
+    [],
   );
 
   const onRenameKeyDown = useCallback(
@@ -81,7 +81,7 @@ export const RenameInput = ({
         onRenameComplete(name);
       }
     },
-    [name, onRenameCancel, onRenameComplete, value]
+    [name, onRenameCancel, onRenameComplete, value],
   );
 
   const onRenameBlur = useCallback(() => {
